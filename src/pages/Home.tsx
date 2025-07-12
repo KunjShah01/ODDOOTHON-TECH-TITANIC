@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Search, Filter, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 import { useAppStore } from '../store/appStore';
@@ -15,13 +15,19 @@ export const Home: React.FC = () => {
   const [showLoginModal, setShowLoginModal] = useState(false);
 
   const { isAuthenticated } = useAuthStore();
-  const { 
-    users, 
-    loading, 
+  const {
+    users,
+    loading,
     availabilityFilter,
     setSearchQuery,
-    setAvailabilityFilter 
+    setAvailabilityFilter,
+    fetchUsers,
+    searchQuery
   } = useAppStore();
+  // Fetch users from backend on mount
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers]);
 
   const itemsPerPage = 6;
 
@@ -29,11 +35,9 @@ export const Home: React.FC = () => {
   const filteredUsers = useMemo(() => {
     return users.filter(user => {
       const matchesSearch = user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           user.skillsOffered.some(skill => skill.toLowerCase().includes(searchQuery.toLowerCase())) || // Moved searchQuery declaration inside the isAuthenticated check
-                           user.skillsWanted.some(skill => skill.toLowerCase().includes(searchQuery.toLowerCase()));
-      
+        user.skillsOffered.some(skill => skill.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        user.skillsWanted.some(skill => skill.toLowerCase().includes(searchQuery.toLowerCase()));
       const matchesAvailability = !availabilityFilter || user.availability === availabilityFilter;
-      
       return matchesSearch && matchesAvailability && user.isPublic;
     });
   }, [users, searchQuery, availabilityFilter]);
@@ -290,6 +294,6 @@ export const Home: React.FC = () => {
   );
 };
 
-const searchQuery = ''; // Define searchQuery with a default value or manage it with state if needed globally
+
 
 

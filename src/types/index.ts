@@ -46,6 +46,8 @@ export interface AppState {
   setLoading: (loading: boolean) => void;
   setSearchQuery: (query: string) => void;
   setAvailabilityFilter: (filter: string) => void;
-  addSwapRequest: (request: SwapRequest) => void;
-  updateSwapRequest: (id: string, updates: Partial<SwapRequest>) => void;
+  fetchUsers: () => Promise<void>;
+  fetchSwapRequests: (token: string) => Promise<void>;
+  addSwapRequest: (request: Omit<SwapRequest, 'id' | 'createdAt' | 'updatedAt'>, token: string) => Promise<void>;
+  updateSwapRequest: (id: string, updates: Partial<SwapRequest>, token: string) => Promise<void>;
 }

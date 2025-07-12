@@ -1,18 +1,22 @@
-import React, { useState, useMemo } from 'react';
-import { Filter, Clock, CheckCircle, XCircle, User, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { Filter, Clock, CheckCircle, XCircle, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useAppStore } from '../store/appStore';
 import { useAuthStore } from '../store/authStore';
-import { SwapRequest } from '../types';
 import { SkillTag } from '../components/SkillTag';
-import { LoadingSpinner } from '../components/LoadingSpinner';
 import toast from 'react-hot-toast';
 
 export const SwapRequests: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState<string>('');
   const [currentPage, setCurrentPage] = useState(1);
   
-  const { swapRequests, updateSwapRequest } = useAppStore();
-  const { user } = useAuthStore();
+  const { swapRequests, updateSwapRequest, fetchSwapRequests } = useAppStore();
+  const { user, token } = useAuthStore();
+  // Fetch swap requests from backend on mount
+  useEffect(() => {
+    if (token) {
+      fetchSwapRequests(token);
+    }
+  }, [fetchSwapRequests, token]);
 
   const itemsPerPage = 6;
 
@@ -34,28 +38,26 @@ export const SwapRequests: React.FC = () => {
 
   const handleAccept = async (requestId: string) => {
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 500));
-      updateSwapRequest(requestId, { 
+      if (!token) throw new Error('Not authenticated');
+      await updateSwapRequest(requestId, {
         status: 'accepted',
         updatedAt: new Date().toISOString()
-      });
+      }, token);
       toast.success('Swap request accepted!');
-    } catch (error) {
+    } catch {
       toast.error('Failed to accept request');
     }
   };
 
   const handleReject = async (requestId: string) => {
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 500));
-      updateSwapRequest(requestId, { 
+      if (!token) throw new Error('Not authenticated');
+      await updateSwapRequest(requestId, {
         status: 'rejected',
         updatedAt: new Date().toISOString()
-      });
+      }, token);
       toast.success('Swap request rejected');
-    } catch (error) {
+    } catch {
       toast.error('Failed to reject request');
     }
   };
